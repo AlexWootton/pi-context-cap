@@ -1,17 +1,26 @@
 {
-	"name": "pi-opus-budget-guard",
-	"version": "0.1.1",
-	"description": "Caps contextWindow on long-context Claude models so pi's auto-compaction fires before crossing Anthropic's 200k standard-tier pricing boundary.",
-	"keywords": ["pi-package", "pi-extension", "anthropic", "claude", "compaction", "cost-control"],
+	"name": "pi-anthropic-tier-cap",
+	"version": "0.1.0",
+	"description": "Caps contextWindow on long-context Anthropic Claude models so pi's auto-compaction fires before crossing the 200k standard-tier pricing boundary.",
+	"keywords": [
+		"pi-package",
+		"pi-extension",
+		"anthropic",
+		"claude",
+		"tier",
+		"context-window",
+		"compaction",
+		"cost-control"
+	],
 	"license": "MIT",
 	"author": "Alex Wootton (https://github.com/AlexWootton)",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/AlexWootton/pi-opus-budget-guard.git"
+		"url": "git+https://github.com/AlexWootton/pi-anthropic-tier-cap.git"
 	},
-	"homepage": "https://github.com/AlexWootton/pi-opus-budget-guard#readme",
+	"homepage": "https://github.com/AlexWootton/pi-anthropic-tier-cap#readme",
 	"bugs": {
-		"url": "https://github.com/AlexWootton/pi-opus-budget-guard/issues"
+		"url": "https://github.com/AlexWootton/pi-anthropic-tier-cap/issues"
 	},
 	"pi": {
 		"extensions": ["./index.ts"]

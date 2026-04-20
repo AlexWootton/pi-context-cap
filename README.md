@@ -1,9 +1,11 @@
-# pi-opus-budget-guard
+# pi-anthropic-tier-cap
 
-[![npm version](https://img.shields.io/npm/v/pi-opus-budget-guard.svg)](https://www.npmjs.com/package/pi-opus-budget-guard)
-[![license](https://img.shields.io/npm/l/pi-opus-budget-guard.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/pi-anthropic-tier-cap.svg)](https://www.npmjs.com/package/pi-anthropic-tier-cap)
+[![license](https://img.shields.io/npm/l/pi-anthropic-tier-cap.svg)](./LICENSE)
 
 A tiny [pi](https://github.com/badlogic/pi-mono) extension that prevents long-context Anthropic Claude models (Opus 4.6, Opus 4.7, Sonnet 4.6, and any future 1M-window variants) from crossing Anthropic's **200k standard-tier pricing boundary**, above which input and output tokens are billed at roughly 2× the normal rate.
+
+> Previously published as [`pi-opus-budget-guard`](https://www.npmjs.com/package/pi-opus-budget-guard). That name was too narrow ("opus" undersells it — this covers Sonnet 4.6 and every future 1M-window Claude) and collided with the unrelated [`pi-budget-guard`](https://www.npmjs.com/package/pi-budget-guard) (a dollar-spend enforcement tool).
 
 ## The problem
 
@@ -30,15 +32,15 @@ Context: 182,411 / 200,000 (91%)
 ## Install
 
 ```bash
-# From npm (recommended once published)
-pi install npm:pi-opus-budget-guard
+# From npm (recommended)
+pi install npm:pi-anthropic-tier-cap
 
 # Or directly from git
-pi install git:github.com/AlexWootton/pi-opus-budget-guard
+pi install git:github.com/AlexWootton/pi-anthropic-tier-cap
 
 # Or local clone for development
-git clone https://github.com/AlexWootton/pi-opus-budget-guard
-pi install ./pi-opus-budget-guard
+git clone https://github.com/AlexWootton/pi-anthropic-tier-cap
+pi install ./pi-anthropic-tier-cap
 ```
 
 By default (no config required) the extension caps every model whose native `contextWindow > 200_000` down to exactly `200_000`. That's the intended setup for most users.
@@ -49,8 +51,8 @@ Drop a JSON file at either path:
 
 | Location | Scope |
 |---|---|
-| `~/.pi/agent/extensions/opus-budget-guard.json` | Global |
-| `<project>/.pi/extensions/opus-budget-guard.json` | Project (overrides global) |
+| `~/.pi/agent/extensions/anthropic-tier-cap.json` | Global |
+| `<project>/.pi/extensions/anthropic-tier-cap.json` | Project (overrides global) |
 
 ### Schema
 
@@ -119,6 +121,11 @@ For typical conversational coding, this is rare. For strict guarantees:
 - Set `cap: 180000` to give yourself ~36k of headroom below the tier boundary.
 - Or bump `compaction.reserveTokens` in `~/.pi/agent/settings.json` (but note this affects *all* models, not just the long-context ones).
 
+## See also
+
+- [`pi-model-aware-compaction`](https://www.npmjs.com/package/pi-model-aware-compaction) — per-model **percent-based** compaction thresholds, a more general solution. Can be configured to cover this tier-cap use case (`{ "global": 20 }` plus a lower `reserveTokens`), but requires mental translation from tier boundaries to percentages and tuning of pi's compaction settings. Pick that one if you want fine-grained control across many models; pick this one if you want a zero-config, one-knob fix specifically for Anthropic's pricing tiers.
+- [`pi-budget-guard`](https://www.npmjs.com/package/pi-budget-guard) — tracks **dollar spend** per session and blocks tool calls at a budget threshold. Complementary (dollars ≠ tokens); nothing stops you from running both.
+
 ## How it works
 
 Pi's `ModelRegistry.getAll()` returns a live array of `Model` objects. The extension mutates `model.contextWindow` on each matching entry at `session_start` before any LLM request is built. Pi's [`shouldCompact()`](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/compaction/compaction.ts) reads this value directly:
@@ -139,18 +146,18 @@ Extensions are loaded in this order:
 1. Installed packages (from `settings.json`'s `packages` array)
 2. Ad-hoc extensions passed via `--extension` / `-e`
 
-Each extension's `session_start` handler fires in the same order. That means if you combine this guard with another extension loaded via `-e` that reads `contextWindow` in its own `session_start` handler, the other extension may see the *pre-cap* value. Mitigations:
+Each extension's `session_start` handler fires in the same order. That means if you combine this extension with another loaded via `-e` that reads `contextWindow` in its own `session_start` handler, the other extension may see the *pre-cap* value. Mitigations:
 
 - Read `contextWindow` in `before_agent_start` or later — by then the cap is applied.
 - Or install both extensions as packages (order within packages is settings-file order).
-- Or pass the guard first when using `-e`: `pi -e path/to/guard.ts -e path/to/other.ts`.
+- Or pass this one first when using `-e`: `pi -e path/to/tier-cap.ts -e path/to/other.ts`.
 
 For typical single-extension usage, this is a non-issue.
 
 ## Uninstall
 
 ```bash
-pi remove npm:pi-opus-budget-guard
+pi remove npm:pi-anthropic-tier-cap
 ```
 
 Fully reversible. Pi's ModelRegistry is rebuilt on each launch from pi-ai's canonical model list, so removing the extension restores every affected model's native window on the next startup.

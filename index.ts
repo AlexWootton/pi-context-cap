@@ -1,5 +1,5 @@
 /**
- * pi-opus-budget-guard
+ * pi-anthropic-tier-cap
  *
  * Caps the reported `contextWindow` on long-context Anthropic Claude models
  * (Opus 4.6 / 4.7 / Sonnet 4.6 and future 1M-window variants) so pi's
@@ -13,8 +13,8 @@
  *
  * Config (optional; defaults auto-cap every model with contextWindow > 200k):
  *
- *   ~/.pi/agent/extensions/opus-budget-guard.json        (global)
- *   <cwd>/.pi/extensions/opus-budget-guard.json          (project override)
+ *   ~/.pi/agent/extensions/anthropic-tier-cap.json       (global)
+ *   <cwd>/.pi/extensions/anthropic-tier-cap.json         (project override)
  *
  *   {
  *     "cap": 200000,                 // default contextWindow cap
@@ -52,8 +52,8 @@ const DEFAULT_CONFIG: GuardConfig = {
 
 function loadConfig(cwd: string): GuardConfig {
 	const paths = [
-		join(getAgentDir(), "extensions", "opus-budget-guard.json"),
-		join(cwd, ".pi", "extensions", "opus-budget-guard.json"),
+		join(getAgentDir(), "extensions", "anthropic-tier-cap.json"),
+		join(cwd, ".pi", "extensions", "anthropic-tier-cap.json"),
 	];
 
 	let cfg: GuardConfig = { ...DEFAULT_CONFIG, models: { ...DEFAULT_CONFIG.models } };
@@ -68,7 +68,7 @@ function loadConfig(cwd: string): GuardConfig {
 				models: { ...cfg.models, ...(raw.models ?? {}) },
 			};
 		} catch (e) {
-			console.error(`[opus-budget-guard] could not parse ${path}: ${e}`);
+			console.error(`[anthropic-tier-cap] could not parse ${path}: ${e}`);
 		}
 	}
 
@@ -103,7 +103,7 @@ export default function (pi: ExtensionAPI) {
 
 		if (cappedCount > 0) {
 			ctx.ui.notify(
-				`opus-budget-guard: capped ${cappedCount} model(s) to ≤ ${cfg.cap.toLocaleString()} tokens`,
+				`anthropic-tier-cap: capped ${cappedCount} model(s) to ≤ ${cfg.cap.toLocaleString()} tokens`,
 				"info",
 			);
 		}
