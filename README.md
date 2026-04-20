@@ -1,5 +1,8 @@
 # pi-opus-budget-guard
 
+[![npm version](https://img.shields.io/npm/v/pi-opus-budget-guard.svg)](https://www.npmjs.com/package/pi-opus-budget-guard)
+[![license](https://img.shields.io/npm/l/pi-opus-budget-guard.svg)](./LICENSE)
+
 A tiny [pi](https://github.com/badlogic/pi-mono) extension that prevents long-context Anthropic Claude models (Opus 4.6, Opus 4.7, Sonnet 4.6, and any future 1M-window variants) from crossing Anthropic's **200k standard-tier pricing boundary**, above which input and output tokens are billed at roughly 2× the normal rate.
 
 ## The problem

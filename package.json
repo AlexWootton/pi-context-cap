@@ -1,6 +1,6 @@
 {
 	"name": "pi-opus-budget-guard",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Caps contextWindow on long-context Claude models so pi's auto-compaction fires before crossing Anthropic's 200k standard-tier pricing boundary.",
 	"keywords": ["pi-package", "pi-extension", "anthropic", "claude", "compaction", "cost-control"],
 	"license": "MIT",
