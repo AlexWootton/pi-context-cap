@@ -5,10 +5,10 @@ on:
     tags:
       - "v*"
 
-# Minimal permissions needed for:
+# Permissions:
 #  - contents: write → creating a GitHub Release
-#  - id-token: write → npm provenance (cryptographically ties the published
-#    tarball to this workflow run; visible as a ✅ on the npm package page)
+#  - id-token: write → OIDC token exchange for npm trusted publishing
+#                       (also enables npm provenance automatically)
 permissions:
   contents: write
   id-token: write
@@ -23,8 +23,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing requires npm >= 11.5.1; the npm shipped with
+      # Node LTS is older, so upgrade explicitly.
+      - name: Upgrade npm (trusted publishing requires >= 11.5.1)
+        run: npm install -g npm@latest
 
       - name: Verify tag matches package.json version
         run: |
@@ -35,10 +40,11 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm
-        run: npm publish --access=public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No NODE_AUTH_TOKEN needed: npm CLI detects the GitHub Actions OIDC
+      # token via the id-token: write permission and exchanges it with npm
+      # for a one-shot publish credential. Provenance is enabled automatically.
+      - name: Publish to npm (trusted publisher)
+        run: npm publish --access=public
 
       - name: Create GitHub Release
         env:
