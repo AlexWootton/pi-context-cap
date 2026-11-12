@@ -20,10 +20,14 @@
 	"bugs": {
 		"url": "https://github.com/AlexWootton/pi-context-cap/issues"
 	},
+	"type": "module",
+	"scripts": {
+		"test": "node --test test/"
+	},
 	"pi": {
 		"extensions": ["./index.ts"]
 	},
-	"files": ["index.ts", "README.md", "LICENSE"],
+	"files": ["index.ts", "caps.ts", "README.md", "LICENSE"],
 	"peerDependencies": {
 		"@mariozechner/pi-coding-agent": "*"
 	}

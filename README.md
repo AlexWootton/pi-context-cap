@@ -124,6 +124,20 @@ All keys are optional. Values shown are the defaults.
 
 Model IDs match `model.id` exactly; run `pi --list-models` to see them. Unknown IDs in `models` are silently ignored.
 
+## Session-local cap
+
+Use `/context-cap` to change the cap for the current session without editing config:
+
+| Command | Effect |
+|---|---|
+| `/context-cap` or `/context-cap status` | Show the active cap and the current model's effective and native window. |
+| `/context-cap 128k` | Cap every model at 128,000 tokens in this session. Accepts `200000`, `200,000`, `200k`, `1.5m`. |
+| `/context-cap 50` | Cap every model at 50% of its native window. A bare number up to 100, or any number with `%`, is a percentage. |
+| `/context-cap max` | Remove all caps in this session, so every model uses its native window (same as `100`). |
+| `/context-cap off` | Remove the session cap and return to the configured caps. |
+
+A session cap replaces the configured caps (`cap`, `matchPatterns`, and `models`) for every model, so it can also raise a model above its configured cap, up to its native window. The setting is saved as a custom session entry, so it survives `/reload` and resume, follows the active branch in `/tree`, and does not enter model context. Other sessions keep their own setting.
+
 ## Other use cases
 
 The mechanism is general:
@@ -138,7 +152,8 @@ All of these are one-file config changes.
 
 **Does:**
 - Cap `contextWindow` on matching models so pi's built-in auto-compaction fires at the cap point.
-- Emit a `capped N model(s)` notification once on session start.
+- Emit a notification on session start when any model is capped.
+- Let `/context-cap` set a cap for the current session only.
 - Work with all of pi's compaction machinery (including `session_before_compact` hooks, manual `/compact`, and compaction error recovery) without modification.
 - Apply project config on top of global config.
 
@@ -174,7 +189,7 @@ export function shouldCompact(contextTokens, contextWindow, settings) {
 }
 ```
 
-So the cap flows through to every existing compaction code path automatically. The extension itself is under 50 lines of logic.
+So the cap flows through to every existing compaction code path automatically. The extension remembers each model's native window, so lowering, raising, or clearing a session cap is reversible. It reapplies caps before each agent run in case another extension refreshed model metadata.
 
 ### A note on extension load order
 
